@@ -1,23 +1,74 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import styled from "styled-components";
+import axios from "axios";
+
+import BeerCard from "./components/beer-card";
+import Footer from "./components/shared/footer";
+import Header from "./components/shared/header";
+import Hero from "./components/hero";
+import Section from "./components/layout/section";
+import Wrapper from "./components/layout/wrapper";
+import MainWrapper from "./components/layout/MainWrapper";
+
+// const MainWrapper = styled.main`
+//   display: block;
+//   position: relative;
+//   width: 100%;
+
+//   .grid {
+//     display: flex;
+//     flex-wrap: wrap;
+//   }
+// `;
 
 function App() {
+  const [data, setData] = useState({ beers: [] });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios(
+        "https://api.punkapi.com/v2/beers?page=1&per_page=10"
+      );
+
+      console.log(result.data);
+
+      setData({ beers: result.data });
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <MainWrapper>
+        <Header />
+        <Section>
+          <Hero />
+        </Section>
+
+        <Section>
+          {loading && <div>loading....</div>}
+
+          {!loading && (
+            <Wrapper>
+              <div className="grid">
+                {data.beers.map((item, index) => (
+                  <BeerCard
+                    key={index.toString()}
+                    image={item.image_url}
+                    title={item.name}
+                    description={item.brewers_tips}
+                  />
+                ))}
+              </div>
+            </Wrapper>
+          )}
+        </Section>
+
+        <Footer />
+      </MainWrapper>
     </div>
   );
 }
